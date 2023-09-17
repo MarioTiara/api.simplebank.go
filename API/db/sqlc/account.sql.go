@@ -39,6 +39,16 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 	return i, err
 }
 
+const deleteAuthor = `-- name: DeleteAuthor :exec
+DELETE FROM accounts
+WHERE id = $1
+`
+
+func (q *Queries) DeleteAuthor(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteAuthor, id)
+	return err
+}
+
 const getAccount = `-- name: GetAccount :one
 SELECT id, owner, balance, currency, created_at FROM accounts
 WHERE id = $1 LIMIT 1
@@ -98,9 +108,10 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
 	return items, nil
 }
 
-const updateAuthorBios = `-- name: UpdateAuthorBios :exec
+const updateAuthorBios = `-- name: UpdateAuthorBios :one
 UPDATE accounts SET balance = $2
 WHERE id=$1
+RETURNING id, owner, balance, currency, created_at
 `
 
 type UpdateAuthorBiosParams struct {
@@ -108,7 +119,15 @@ type UpdateAuthorBiosParams struct {
 	Balance int64 `json:"balance"`
 }
 
-func (q *Queries) UpdateAuthorBios(ctx context.Context, arg UpdateAuthorBiosParams) error {
-	_, err := q.db.ExecContext(ctx, updateAuthorBios, arg.ID, arg.Balance)
-	return err
+func (q *Queries) UpdateAuthorBios(ctx context.Context, arg UpdateAuthorBiosParams) (Account, error) {
+	row := q.db.QueryRowContext(ctx, updateAuthorBios, arg.ID, arg.Balance)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Balance,
+		&i.Currency,
+		&i.CreatedAt,
+	)
+	return i, err
 }
