@@ -97,3 +97,18 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
 	}
 	return items, nil
 }
+
+const updateAuthorBios = `-- name: UpdateAuthorBios :exec
+UPDATE accounts SET balance = $2
+WHERE id=$1
+`
+
+type UpdateAuthorBiosParams struct {
+	ID      int64 `json:"id"`
+	Balance int64 `json:"balance"`
+}
+
+func (q *Queries) UpdateAuthorBios(ctx context.Context, arg UpdateAuthorBiosParams) error {
+	_, err := q.db.ExecContext(ctx, updateAuthorBios, arg.ID, arg.Balance)
+	return err
+}
