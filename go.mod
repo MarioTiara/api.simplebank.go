@@ -1,4 +1,4 @@
-module github.com/marioTiara/simplebank
+module github.com/marioTiara/api.simplebank.go
 
 go 1.21.0
 
