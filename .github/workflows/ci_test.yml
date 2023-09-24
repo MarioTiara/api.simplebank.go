@@ -42,7 +42,11 @@ jobs:
         sudo mv migrate /usr/bin
         which migrate
 
-    - name: Run Migrations
+    - name: Run Migrations Up
       run: make migrateup
+
     - name: Test
       run: make test
+      
+    - name: Run Migrations Down
+      run: make migratedown
