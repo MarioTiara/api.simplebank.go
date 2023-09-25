@@ -30,6 +30,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
 	}
 
 	hashedPassword, err := utils.HashPassword(req.Password)
@@ -57,9 +58,9 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	rsp := db.User{
+	rsp := createUserReponse{
 		Username:          user.Username,
-		FullName:          user.Username,
+		FullName:          user.FullName,
 		Email:             user.Email,
 		PasswordChangedAt: user.PasswordChangedAt,
 		CreatedAt:         user.CreatedAt,
