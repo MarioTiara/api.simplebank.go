@@ -25,7 +25,7 @@ type eqCreateUserParamsMatcher struct {
 	password string
 }
 
-func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
+func (e *eqCreateUserParamsMatcher) Matches(x interface{}) bool {
 	arg, ok := x.(db.CreateUserParams)
 	if !ok {
 		return false
@@ -39,12 +39,12 @@ func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
 	return reflect.DeepEqual(e.arg, arg)
 }
 
-func (e eqCreateUserParamsMatcher) String() string {
+func (e *eqCreateUserParamsMatcher) String() string {
 	return fmt.Sprintf("matches arg %v and password %v", e.arg, e.password)
 }
 
 func EqCreateUserParams(arg db.CreateUserParams, password string) gomock.Matcher {
-	return eqCreateUserParamsMatcher{arg, password}
+	return &eqCreateUserParamsMatcher{arg, password}
 }
 
 func TestUserAPI(t *testing.T) {
@@ -181,7 +181,7 @@ func TestUserAPI(t *testing.T) {
 			tc.buildStubs(store)
 
 			//start test server and send request
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			//Marshal body data to JSON
